@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neural Network Simulator</title>
+    <link rel="stylesheet" href="css/style.css">
+    
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <aside id="sidebar">
+        <h2>Neural Control</h2>
+        
+        <div class="btn-group">
+            <button id="btn-train" class="btn-primary">▶ Entrenar</button>
+            <button id="btn-step" class="btn-secondary" title="Avanzar una época">⏯ Paso</button>
+            <button id="btn-reset" class="btn-secondary">🔄 Reset</button>
+        </div>
+
+        <hr>
+        <label class="section-label">Misión</label>
+        
+        <div class="control-group" data-desc="Selecciona el desafío. 'Random' es ruido (imposible de aprender). 'XOR' es un problema de lógica compleja.">
+            <label>Problema</label>
+            <select id="dataset-select">
+                <option value="random">Random</option>
+                <option value="AND">Compuerta AND</option>
+                <option value="OR">Compuerta OR</option>
+                <option value="XOR">Compuerta XOR</option>
+                <option value="RGB">Clasificador RGB</option>
+            </select>
+        </div>
+
+        <hr>
+        <label class="section-label">Arquitectura</label>
+        
+        <div class="control-group" data-desc="Número de datos que entran a la red (Sensores)."><label>Entradas</label><input type="number" id="input-nodes" value="3" min="1" max="10"></div>
+        <div class="control-group" data-desc="Neuronas de procesamiento interno. Más neuronas = Pensamiento más complejo."><label>Ocultas</label><input type="number" id="hidden-nodes" value="5" min="0" max="12"></div>
+        <div class="control-group" data-desc="Número de respuestas posibles (Clases)."><label>Salidas</label><input type="number" id="output-nodes" value="2" min="1" max="5"></div>
+
+        <hr>
+        <label class="section-label">Configuración</label>
+
+        <div class="control-group" data-desc="La 'personalidad' de las neuronas ocultas. ReLU es rápida, Tanh es suave."><label>Act. Oculta</label><select id="act-hidden"><option value="ReLU">ReLU</option><option value="Tanh">Tanh</option><option value="Sigmoid">Sigmoid</option><option value="Linear">Linear</option></select></div>
+        <div class="control-group" data-desc="Cómo decide la respuesta final la red."><label>Act. Salida</label><select id="act-output"><option value="Sigmoid">Sigmoid</option><option value="Linear">Linear</option><option value="Tanh">Tanh</option><option value="ReLU">ReLU</option></select></div>
+
+        <div class="control-group" data-desc="Velocidad a la que la red modifica sus conexiones. Muy alto = inestable. Muy bajo = lento.">
+            <label>Learning Rate <span class="help-icon" data-tooltip="Es el tamaño del 'paso' que da la red para corregir sus errores. Si es muy grande, salta la solución. Si es muy chico, tarda una eternidad.">?</span></label>
+            <input type="number" id="lr-input" value="0.05" step="0.001">
+        </div>
+        
+        <div class="control-group" data-desc="Límite de intentos de entrenamiento."><label>Máx. Épocas</label><input type="number" id="max-epochs" value="5000" step="100"></div>
+        
+        <div class="control-group" data-desc="Meta de calidad. Si el error baja de este número, el entrenamiento se considera exitoso.">
+            <label>Stop Loss <span class="help-icon" data-tooltip="Es el nivel de error aceptable. 0.001 significa que queremos una precisión del 99.9%.">?</span></label>
+            <input type="number" id="target-loss" value="0.001" step="0.0001">
+        </div>
+
+        <hr>
+        <div class="stats-box">
+            <div>Estado: <span id="status-val" style="color:#fff">LISTO</span></div>
+            <div>Época: <span id="epoch-val" class="val">0</span></div>
+            <div>Error: <span id="loss-val" class="val error">1.000</span></div>
+        </div>
+
+        <div class="info-box" id="guide-text">Configura la red y presiona Entrenar. Pasa el mouse sobre las opciones para aprender más.</div>
+    </aside>
+
+    <div id="canvas-container"></div>
+    
+    <div id="monitor-panel">
+        <h3>Diagnóstico <span class="help-icon" data-tooltip="Es la 'nota' del examen. Mide qué porcentaje de pruebas la red resolvió correctamente. 100% es perfecto.">?</span></h3>
+        <div class="monitor-row"><span>Precisión:</span><span id="acc-val" style="color:#00f3ff; font-weight:bold;">0%</span></div>
+        <div class="acc-bar-bg"><div id="acc-bar-fill"></div></div>
+        <hr>
+        <div class="legend-item"><span class="dot" style="background:#00f3ff"></span> <span class="legend-text">Positivo (+)</span></div>
+        <div class="legend-item"><span class="dot" style="background:#ff0055"></span> <span class="legend-text">Negativo (-)</span></div>
+    </div>
+
+    <div id="dashboard">
+        <div class="chart-wrapper">
+            <div class="canvas-box"><canvas id="lossChart"></canvas></div>
+            <div class="chart-caption">
+                <strong>📉 Curva de Error</strong> 
+                <span class="help-icon" data-tooltip="Muestra el 'dolor' de la red. La línea debe bajar. Si baja, está aprendiendo. Si sube o se agita, está confundida.">?</span>
+            </div>
+        </div>
+        <div class="chart-wrapper">
+            <div class="canvas-box"><canvas id="outputChart"></canvas></div>
+            <div class="chart-caption">
+                <strong>📊 Comparativa</strong> 
+                <span class="help-icon" data-tooltip="Verdad vs Predicción. La barra CIAN (lo que la red cree) debe intentar igualar la altura de la barra GRIS (la respuesta correcta).">?</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="tooltip"></div>
+    <div id="winner-label"></div>
+
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>

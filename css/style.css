@@ -1,0 +1,151 @@
+:root { --bg: #050508; --panel: rgba(15, 18, 25, 0.98); --primary: #00f3ff; --secondary: #ff0055; --text: #e0e0e0; --border: #333; }
+body { margin: 0; overflow: hidden; background-color: var(--bg); font-family: 'Segoe UI', sans-serif; color: var(--text); }
+
+#canvas-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; }
+
+/* SIDEBAR */
+#sidebar {
+    position: absolute; top: 0; left: 0; bottom: 0; width: 360px;
+    background: var(--panel); border-right: 1px solid var(--border);
+    padding: 15px; display: flex; flex-direction: column; gap: 10px;
+    z-index: 30; overflow-y: auto; box-shadow: 5px 0 20px rgba(0,0,0,0.5);
+}
+
+h2 { margin: 0; font-size: 19px; padding-bottom: 8px; border-bottom: 1px solid #333; color: var(--primary); letter-spacing: 1px; }
+hr { margin: 8px 0; border: 0; border-top: 1px solid var(--border); width: 100%; }
+.section-label { font-size: 11px; margin-top: 2px; color: #888; text-transform: uppercase; font-weight: bold; letter-spacing: 1px; }
+
+.control-group { display: flex; justify-content: space-between; align-items: center; padding: 3px 0; }
+.control-group label { font-size: 13px; color: #ddd; display: flex; align-items: center; }
+
+input[type="number"], select {
+    width: 100px; background: #111; border: 1px solid #444; color: var(--primary);
+    padding: 5px; border-radius: 4px; text-align: right; font-family: monospace; font-size: 12px; outline: none;
+}
+input[type="number"]:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 5px rgba(0, 243, 255, 0.3); }
+
+.btn-group { display: flex; gap: 8px; margin-bottom: 5px; }
+button {
+    flex: 1; padding: 10px; border: none; border-radius: 4px; cursor: pointer;
+    font-weight: bold; text-transform: uppercase; letter-spacing: 1px; transition: 0.2s; font-size: 11px;
+    background: var(--primary); color: black;
+}
+button:hover { box-shadow: 0 0 15px var(--primary); transform: translateY(-1px); }
+.btn-secondary { background: transparent; border: 1px solid #555; color: #aaa; }
+.btn-secondary:hover { border-color: #fff; color: #fff; }
+
+.stats-box { background: rgba(0,0,0,0.4); padding: 12px; border-radius: 5px; font-size: 13px; border-left: 3px solid var(--secondary); display: flex; flex-direction: column; gap: 4px; }
+.val { font-weight: bold; float: right; font-family: monospace; }
+.val.error { color: var(--secondary); }
+
+/* CAJA DE INFORMACIÓN */
+.info-box { 
+    margin-top: auto; font-size: 12px; line-height: 1.4; color: #ccc; 
+    background: linear-gradient(45deg, #101010, #1a1a1a); 
+    padding: 12px; border-radius: 6px; border: 1px solid #333; 
+    min-height: 60px; transition: border-color 0.3s, color 0.3s;
+}
+
+/* DASHBOARD */
+#dashboard {
+    position: absolute; bottom: 0; left: 361px; right: 0; height: 260px;
+    background: var(--panel); border-top: 1px solid var(--border);
+    display: flex; justify-content: center; align-items: flex-start; gap: 30px;
+    padding: 15px 30px 10px 30px; z-index: 20; box-sizing: border-box;
+}
+.chart-wrapper { width: 48%; height: 100%; display: flex; flex-direction: column; position: relative; max-width: 600px; }
+.canvas-box { flex: 1; position: relative; width: 100%; min-height: 0; }
+.chart-caption {
+    margin-top: 6px; font-size: 11px; color: #999; text-align: center;
+    background: rgba(0,0,0,0.3); padding: 4px 10px;
+    border-radius: 4px; border-left: 2px solid var(--primary); line-height: 1.4;
+    display: flex; justify-content: center; align-items: center;
+}
+.chart-caption strong { color: #fff; margin-right: 5px; }
+
+/* MONITOR */
+#monitor-panel {
+    position: absolute; top: 20px; right: 20px; width: 200px;
+    background: rgba(15, 18, 25, 0.95); border: 1px solid #333; border-top: 3px solid var(--primary);
+    border-radius: 8px; padding: 15px; z-index: 20; pointer-events: auto;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+}
+#monitor-panel h3 { margin: 0 0 10px 0; font-size: 14px; color: #fff; font-weight: 600; letter-spacing: 0.5px; }
+.monitor-row { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 5px; color: #ccc; }
+.acc-bar-bg { width: 100%; height: 6px; background: #222; border-radius: 3px; margin-bottom: 12px; overflow: hidden; }
+#acc-bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #ff0055, #00f3ff); transition: width 0.3s; }
+.legend-item { display: flex; align-items: center; gap: 8px; margin-bottom: 3px; }
+.dot { width: 8px; height: 8px; border-radius: 50%; }
+.legend-text { font-size: 11px; color: #aaa; }
+
+/* TOOLTIPS DE MOUSE */
+#tooltip {
+    position: absolute; background: rgba(10, 10, 10, 0.95); border: 1px solid #555; padding: 8px 12px;
+    font-size: 12px; pointer-events: none; display: none; z-index: 1000; white-space: pre-line; 
+    border-radius: 4px; color: #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.8);
+    transform: translate(15px, 15px);
+}
+
+/* WINNER LABEL */
+#winner-label {
+    position: absolute; 
+    background: rgba(0, 20, 10, 0.9); 
+    border: 1px solid #00ff00; 
+    border-left: 4px solid #00ff00;
+    color: #ccffcc;
+    padding: 10px 15px; 
+    border-radius: 4px; 
+    pointer-events: none; 
+    display: none; 
+    z-index: 900; 
+    font-family: 'Segoe UI', monospace; 
+    box-shadow: 0 0 20px rgba(0, 255, 0, 0.15); 
+    min-width: 120px;
+}
+#winner-label strong { display: block; margin-bottom: 5px; font-size: 13px; color: #fff; border-bottom: 1px solid rgba(0,255,0,0.3); padding-bottom: 3px; }
+#winner-label .win-stat { display: flex; justify-content: space-between; font-size: 11px; margin-top: 2px; }
+#winner-label::after {
+    content: ''; position: absolute; top: 50%; left: -6px; margin-top: -5px;
+    border-width: 5px; border-style: solid; border-color: transparent #00ff00 transparent transparent;
+}
+
+/* HELP ICONS */
+.help-icon {
+    display: inline-flex; justify-content: center; align-items: center;
+    width: 16px; height: 16px; background: #333; color: #aaa;
+    border-radius: 50%; font-size: 11px; cursor: help; margin-left: 6px; position: relative;
+    font-family: serif; font-style: italic; font-weight: bold;
+}
+.help-icon:hover { background: var(--primary); color: #000; }
+
+.help-icon::after {
+    content: attr(data-tooltip); 
+    position: absolute; 
+    width: 220px; /* Ancho aumentado para mejor lectura */
+    background: #151515; 
+    border: 1px solid #555; box-shadow: 0 5px 15px rgba(0,0,0,0.8);
+    color: #ddd; padding: 10px; border-radius: 4px; 
+    font-size: 11px; line-height: 1.4; text-align: left; font-family: sans-serif; font-style: normal; font-weight: normal;
+    visibility: hidden; opacity: 0; transition: 0.2s; pointer-events: none; z-index: 2000;
+}
+.help-icon:hover::after { visibility: visible; opacity: 1; }
+
+/* CORRECCIÓN 1: Tooltips del Sidebar abren a la DERECHA */
+#sidebar .help-icon::after {
+    left: 130%; /* Mueve el tooltip a la derecha del icono */
+    top: 50%; transform: translateY(-50%);
+    right: auto; /* Anula la regla anterior que causaba el corte */
+}
+
+/* Tooltips del Dashboard (Abajo): Hacia ARRIBA */
+#dashboard .help-icon::after {
+    bottom: 130%; left: 50%; transform: translateX(-50%);
+    right: auto; top: auto;
+}
+
+/* Tooltips del Monitor (Arriba derecha): Hacia la IZQUIERDA */
+#monitor-panel .help-icon::after {
+    right: 130%; top: 0;
+    width: 180px;
+    left: auto; 
+}
