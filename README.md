@@ -4,7 +4,7 @@
 
 ![JavaScript](https://img.shields.io/badge/javascript-%23323330.svg?style=flat-square&logo=javascript&logoColor=%23F7DF1E)
 ![Threejs](https://img.shields.io/badge/threejs-black?style=flat-square&logo=three.js&logoColor=white)
-![Vibecoding](https://img.shields.io/badge/AI-Vibecoding-blueviolet?style=flat-square)
+![Platform](https://img.shields.io/badge/Platform-Desktop_Only-lightgrey?style=flat-square&logo=google-chrome&logoColor=black)
 ![Status](https://img.shields.io/badge/Status-Active-success?style=flat-square)
 
 <br>
@@ -26,6 +26,11 @@
 <a href="https://github.com/mnahuelanca/Neural-Network-Simulator/issues" target="_blank">
   <img src="https://img.shields.io/badge/🐛_BUG-REPORTAR_ERROR-ff9900?style=for-the-badge" alt="Reportar Bug"/>
 </a>
+
+<br>
+<br>
+
+> ⚠️ **Nota:** Esta aplicación está diseñada exclusivamente para **PC / Escritorio**. <br> Debido a la complejidad de los controles 3D y la visualización de datos, **no está optimizada para dispositivos móviles**.
 
 </div>
 
